@@ -1,45 +1,12 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="utf-8" />
-    <title>Bookmark Sorter</title>
-    <style>
-        body {
-            width: 300px;
-            padding: 10px;
-            font-family: Arial, sans-serif;
-        }
-        #saveBookmarksButton {
-            background-color: #4caf50;
-            color: white;
-            padding: 10px 20px;
-            margin: 10px 0;
-            border: none;
-            cursor: pointer;
-        }
-        #saveBookmarksButton:hover {
-            background-color: #45a049;
-        }
-        #waitingIndicator {
-            display: none;
-            margin: 10px 0;
-            text-align: center;
-        }
-        .error-container {
-            color: red;
-            display: none;
-            margin-top: 10px;
-        }
-        #bookmarksContainer {
-            margin-top: 10px;
-        }
-    </style>
+  <title>Bookmark Sorting Extension</title>
 </head>
 <body>
-    <button id="saveBookmarksButton">Sort Bookmarks</button>
-    <div id="waitingIndicator">Processing...</div>
-    <div id="errorContainer" class="error-container"></div>
-    <div id="bookmarksContainer"></div>
-    <script type="module" src="eventHandlers.js"></script>
+  <button id="sortBookmarksButton">Sort Bookmarks</button>
+  <!-- TODO: Add additional UI elements as needed -->
+
+  <script src="popup.js"></script>
 </body>
 </html>

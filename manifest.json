@@ -1,20 +1,10 @@
 {
-  "manifest_version": 3,
-  "name": "BookmarkSort",
-  "version": "1.2",
-  "description": "Semantically sorts your bookmarks and adds tags to them.",
-  "icons": {
-    "48": "icons/bookmark-it.png",
-    "96": "icons/bookmark-it@2x.png"
-  },
+  "manifest_version": 2,
+  "name": "Bookmark Sorting Extension",
+  "version": "1.0",
+  "description": "Intelligently sorts and organizes your bookmarks using machine learning techniques.",
   "permissions": ["bookmarks"],
-  "host_permissions": ["http://localhost:5000/*"],
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": "icons/star-empty-48.png",
-    "default_title": "BookmarkSort"
-  },
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self';"
+  "browser_action": {
+    "default_popup": "popup.html"
   }
 }
