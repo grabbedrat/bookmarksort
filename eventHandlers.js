@@ -1,7 +1,8 @@
-import { sendBookmarksToServer } from "./serverCommunication.js";
+// eventHandlers.js
 import { simplifyBookmarkData } from "./bookmarkUtils.js";
+import { preprocessBookmarks, clusterBookmarks, generateBookmarkFolders } from "./backend/bookmarkProcessing.js";
 
-const debugMode = true; // Toggle for enabling/disabling debug logs
+const debugMode = true;
 
 function logDebug(message) {
   if (debugMode) {
@@ -18,12 +19,11 @@ function safelyGetElementById(id) {
 async function removeBookmarksRecursively(bookmarkNodes) {
   for (const node of bookmarkNodes) {
     if (node.children) {
-      await removeBookmarksRecursively(node.children); // Recursively remove children first
+      await removeBookmarksRecursively(node.children);
     }
-    if (node.url) { // Check if it's a bookmark (and not a folder)
+    if (node.url) {
       await browser.bookmarks.remove(node.id);
     } else if (node.id !== "0" && node.id !== "1" && node.id !== "2" && !["toolbar_____", "menu________", "unfiled_____", "mobile______"].includes(node.id)) {
-      // Remove folders that are not root folders
       await browser.bookmarks.removeTree(node.id);
     }
   }
@@ -38,16 +38,15 @@ async function removeAllBookmarksExceptRoots() {
     logDebug("All non-root bookmarks and folders removed.");
   } catch (error) {
     console.error("Error removing all bookmarks except roots:", error);
-    throw error; // Ensure the error is caught in the calling context
+    throw error;
   }
 }
 
 async function setBookmarksInBrowser(sortedBookmarks) {
   try {
-    await removeAllBookmarksExceptRoots(); // Clear existing bookmarks while preserving root folders
+    await removeAllBookmarksExceptRoots();
 
-    // Here, directly use the ID or search for a specific default folder if needed
-    const toolbarFolderId = "toolbar_____"; // Assuming "toolbar_____" is the ID for the Bookmarks Toolbar
+    const toolbarFolderId = "toolbar_____";
 
     let creationPromises = [];
     for (const [category, bookmarks] of Object.entries(sortedBookmarks)) {
@@ -69,7 +68,7 @@ async function setBookmarksInBrowser(sortedBookmarks) {
     logDebug("New bookmarks added to the browser.");
   } catch (error) {
     console.error("Error setting bookmarks in the browser:", error);
-    throw error; // Handle errors appropriately in the calling context
+    throw error;
   }
 }
 
@@ -84,18 +83,13 @@ async function initializeUI() {
 
     try {
       const bookmarkItems = await browser.bookmarks.getTree();
-      const simplifiedBookmarks = bookmarkItems.flatMap(item => 
-        item.children ? item.children.flatMap(simplifyBookmarkData) : simplifyBookmarkData(item))
-        .map(simplifiedBookmark => ({
-          ...simplifiedBookmark,
-          tags: ["Bookmarks Menu"],
-        }));
+      const simplifiedBookmarks = bookmarkItems.flatMap(item =>
+        simplifyBookmarkData(item)
+      );
 
-      const sortedBookmarks = await sendBookmarksToServer(simplifiedBookmarks);
-      if (!sortedBookmarks || typeof sortedBookmarks !== "object") {
-        throw new Error("Received invalid response from the server.");
-      }
-      logDebug("Bookmarks successfully sent to the server and received response.");
+      const preprocessedBookmarks = preprocessBookmarks(simplifiedBookmarks);
+      const clusteredBookmarks = clusterBookmarks(preprocessedBookmarks);
+      const sortedBookmarks = generateBookmarkFolders(clusteredBookmarks);
 
       await setBookmarksInBrowser(sortedBookmarks);
       logDebug("Bookmarks added to the browser successfully.");
