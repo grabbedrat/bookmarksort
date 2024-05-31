@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "BookmarkSort",
+  "version": "1.2",
+  "description": "Semantically sorts your bookmarks and adds tags to them.",
+  "icons": {
+    "48": "icons/bookmark-it.png",
+    "96": "icons/bookmark-it@2x.png"
+  },
+  "permissions": ["bookmarks"],
+  "host_permissions": ["http://localhost:5000/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icons/star-empty-48.png",
+    "default_title": "BookmarkSort"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
+}
