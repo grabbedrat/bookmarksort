@@ -1,10 +1,33 @@
 // eventHandlers.js
 import { simplifyBookmarkData } from "./bookmarkUtils.js";
-import { processBookmarks } from "./bookmarkProcessing.js";
+import { preprocessBookmarks } from "./bookmarkProcessing.js";
 
-// TODO: Implement the event handlers
-// Initialize the UI and bind event listeners
-// Handle the "Sort Bookmarks" button click event
-// Retrieve the bookmarks and simplify the data
-// Process the bookmarks (preprocess, cluster, and generate folders)
-// Update the browser's bookmark structure with the new folders
+async function getBookmarks() {
+  try {
+    const bookmarks = await browser.bookmarks.getTree();
+    return bookmarks;
+  } catch (error) {
+    console.error('Failed to retrieve bookmarks:', error);
+    throw error;
+  }
+}
+
+// eventHandlers.js
+async function handleBookmarkRetrieval() {
+    try {
+      const bookmarks = await getBookmarks();
+      const simplifiedBookmarks = bookmarks.map(bookmark => simplifyBookmarkData(bookmark));
+      console.log('Simplified bookmarks:', simplifiedBookmarks);
+      const processedBookmarks = await preprocessBookmarks(simplifiedBookmarks);
+      // TODO: Update the browser's bookmark structure with the processed bookmarks
+    } catch (error) {
+      console.error('Failed to handle bookmark retrieval:', error);
+    }
+  }
+
+function initializeUI() {
+  const sortButton = document.getElementById('sortBookmarksButton');
+  sortButton.addEventListener('click', handleBookmarkRetrieval);
+}
+
+export { initializeUI };
