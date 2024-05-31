@@ -1,0 +1,15 @@
+{
+  "name": "bookmarksort",
+  "version": "1.0.0",
+  "description": "A browser extension that intelligently sorts and organizes your bookmarks using machine learning techniques.",
+  "main": "bookmarkProcessing.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pyodide": "^0.26.0"
+  }
+}
