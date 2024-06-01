@@ -1,16 +1,12 @@
-// pyodide.js
 let pyodide;
 
 async function initializePyodide() {
-  try {
-    pyodide = await loadPyodide({
-      indexURL: "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/",
-    });
-    console.log("Pyodide loaded successfully!");
-  } catch (error) {
-    console.error("Failed to load Pyodide:", error);
-    throw error;
-  }
+  pyodide = await loadPyodide();  // Remove the 'let' declaration here
+  // Pyodide is now ready to use...
+  console.log(pyodide.runPython(`
+    import sys
+    sys.version
+  `));
 }
 
 async function runPythonCode(code) {
