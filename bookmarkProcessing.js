@@ -1,6 +1,6 @@
 // bookmarkProcessing.js
 import { runPythonCode } from "./pyodide.js";
-import { callLLMAPI } from "./llmUtils.js";
+import { addTagsToBookmarks } from "./llmUtils.js";
 
 export async function simplifyBookmarkData(bookmarkItems, processedIds = null) {
   if (processedIds === null) {
@@ -105,7 +105,7 @@ async function generateFolderNames(clusteredBookmarks) {
 async function processBookmarks(bookmarks) {
   const simplifiedBookmarks = await simplifyBookmarkData(bookmarks);
   console.log('Simplified bookmarks:', simplifiedBookmarks);
-  const taggedBookmarks = await tagBookmarks(simplifiedBookmarks);
+  const taggedBookmarks = await addTagsToBookmarks(simplifiedBookmarks);
   console.log('Tagged bookmarks:', taggedBookmarks);
   const clusteredBookmarks = await clusterBookmarks(taggedBookmarks);
   console.log('Clustered bookmarks:', clusteredBookmarks);
