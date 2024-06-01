@@ -1,9 +1,24 @@
-import { simplifyBookmarkData } from "./bookmarkUtils.js";
 import { processBookmarks } from "./bookmarkProcessing.js";
 
 async function getBookmarks() {
   try {
-    const bookmarks = await browser.bookmarks.getTree();
+    const bookmarkTreeNodes = await browser.bookmarks.getTree();
+    const bookmarks = [];
+
+    function flattenBookmarkTree(node) {
+      if (node.url) {
+        bookmarks.push({
+          id: node.id,
+          title: node.title,
+          url: node.url,
+        });
+      }
+      if (node.children) {
+        node.children.forEach(flattenBookmarkTree);
+      }
+    }
+
+    bookmarkTreeNodes.forEach(flattenBookmarkTree);
     return bookmarks;
   } catch (error) {
     console.error('Failed to retrieve bookmarks:', error);
@@ -14,9 +29,7 @@ async function getBookmarks() {
 async function handleBookmarkRetrieval() {
   try {
     const bookmarks = await getBookmarks();
-    const simplifiedBookmarks = bookmarks.map(bookmark => simplifyBookmarkData(bookmark));
-    console.log('Simplified bookmarks:', simplifiedBookmarks);
-    const processedBookmarks = await processBookmarks(simplifiedBookmarks);
+    const processedBookmarks = await processBookmarks(bookmarks);
     // TODO: Update the browser's bookmark structure with the processed bookmarks
   } catch (error) {
     console.error('Failed to handle bookmark retrieval:', error);

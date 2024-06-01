@@ -13,7 +13,7 @@
 
 3. Set up Pyodide and expose Python functions:
    - x Load and initialize Pyodide in `pyodide/pyodide.js`
-   - Expose Python functions for preprocessing and clustering (pre-processing will actually be done with js+browser api calls)
+   - Expose Python functions for preprocessing and clustering (pre-processing (tagging + batching openai api calls) will actually be done with js+browser api calls instead of python)
    - Test the integration between JavaScript and Python
 
 4. Implement bookmark preprocessing:
