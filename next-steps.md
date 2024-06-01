@@ -1,23 +1,23 @@
 # Development Plan: Bookmark Sorting Extension
 
 1. Set up the development environment:
-   - Install Node.js and npm
-   - Create a new directory for the extension
-   - Initialize a new Node.js project with `npm init`
-   - Install necessary dependencies (e.g., Pyodide)
+   - x Install Node.js and npm
+   - x Create a new directory for the extension
+   - x Initialize a new Node.js project with `npm init`
+   - x Install necessary dependencies (e.g., Pyodide)
 
 2. Implement bookmark retrieval and simplification:
-   - Retrieve bookmarks using the browser's bookmarks API
-   - Implement `simplifyBookmarkData` function in `bookmarkUtils.js`
-   - Update event handler in `eventHandlers.js` to call `simplifyBookmarkData`
+   - x Retrieve bookmarks using the browser's bookmarks API
+   - x Implement `simplifyBookmarkData` function in `bookmarkUtils.js`
+   - x Update event handler in `eventHandlers.js` to call `simplifyBookmarkData`
 
 3. Set up Pyodide and expose Python functions:
-   - Load and initialize Pyodide in `pyodide/pyodide.js`
-   - Expose Python functions for preprocessing and clustering
+   - x Load and initialize Pyodide in `pyodide/pyodide.js`
+   - Expose Python functions for preprocessing and clustering (pre-processing will actually be done with js+browser api calls)
    - Test the integration between JavaScript and Python
 
 4. Implement bookmark preprocessing:
-   - Implement `preprocess_bookmarks` function in `backend/data_preprocessing.py`
+   - Implement `tagBookmarks` function in `backend/bookmarkProcessing.js`
    - Add logic to tag bookmarks using LLM calls for enhanced categorization
    - Test the preprocessing function
 
