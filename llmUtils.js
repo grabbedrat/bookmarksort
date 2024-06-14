@@ -107,7 +107,6 @@ async function addTagsToBookmarks(bookmarkData, batchSize = 10) {
   return taggedData.flat();
 }
 
-
 async function generateFolderNames(clusteredBookmarks) {
   // Generate meaningful folder names based on clustered bookmarks using LLM
   
@@ -115,19 +114,20 @@ async function generateFolderNames(clusteredBookmarks) {
   async function traverseAndGenerateNames(folder) {
     if (folder.children && folder.children.length > 0) {
       for (const child of folder.children) {
-        // Generate meaningful name for the child folder based on its bookmarks
-        const folderName = await generateFolderName(child.bookmarks);
-        child.name = folderName;
-        
-        // Recursively traverse child folders
-        await traverseAndGenerateNames(child);
+        if (child.type === 'folder') {
+          // Generate meaningful name for the child folder based on its bookmarks
+          const folderName = await generateFolderName(child.children.filter(item => item.type === 'bookmark'));
+          child.name = folderName;
+          
+          // Recursively traverse child folders
+          await traverseAndGenerateNames(child);
+        }
       }
     }
   }
   
   // Generate folder name based on bookmarks using LLM
   async function generateFolderName(bookmarks) {
-    
     const apiKey = ''; // Replace with your actual OpenAI API key
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
@@ -135,15 +135,15 @@ async function generateFolderNames(clusteredBookmarks) {
       'Authorization': `Bearer ${apiKey}`,
     };
     
-    const prompt = `Generate a single meaningful folder name containing the following bookmarks:\n\n`;
-    const bookmarkDetails = bookmarks.map(bookmark => `URL: ${bookmark.url}\nTitle: ${bookmark.title}\nTags: ${bookmark.tags}\n`).join('\n');
+    const prompt = `Generate a single meaningful folder name for a folder containing the following bookmarks:\n\n`;
+    const bookmarkDetails = bookmarks.map(bookmark => `URL: ${bookmark.url}\nName: ${bookmark.name}\n`).join('\n');
     
     const data = {
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant that generates meaningful folder names based on the provided bookmarks. Please return these only a single as the output will directly be used as folder names."
+          content: "You are a helpful assistant that generates meaningful folder names based on the provided bookmarks. Please return only a single folder name as the output will be directly used as the folder name."
         },
         {
           role: "user",
@@ -181,4 +181,3 @@ async function generateFolderNames(clusteredBookmarks) {
 }
 
 export { addTagsToBookmarks, generateFolderNames };
- 
