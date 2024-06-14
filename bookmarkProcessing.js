@@ -55,8 +55,14 @@ async function processBookmarks(bookmarks) {
   console.log('Tagged bookmarks:', taggedBookmarks);
   const clusteredBookmarks = await clusterBookmarks(taggedBookmarks);
   console.log('Clustered bookmarks:', clusteredBookmarks);
+
+  downloadJSON(clusteredBookmarks, 'clustered_bookmarks.json');
+
   const processedBookmarks = await generateFolderNames(clusteredBookmarks);
   console.log('Processed bookmarks w/ folder names:', processedBookmarks);
+
+  downloadJSON(processedBookmarks, 'processed_bookmarks.json');
+
   return processedBookmarks;
 }
 
