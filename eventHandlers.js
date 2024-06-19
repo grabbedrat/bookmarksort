@@ -9,7 +9,7 @@ async function getBookmarks() {
       if (node.url) {
         bookmarks.push({
           id: node.id,
-          name: node.title,
+          title: node.title,
           url: node.url,
         });
       }

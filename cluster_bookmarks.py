@@ -1,37 +1,36 @@
 import numpy as np
-import hdbscan
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import PCA
+import hdbscan
 import json
 
-min_cluster_size = 5  # Default: 5, Recommended range: 1-20
-min_samples = 1  # Default: 1, Recommended range: 1-10
-cluster_selection_epsilon = 0.0  # Default: 0.0, Recommended range: 0.0-1.0
-metric = 'euclidean'  # Default: 'euclidean', Options: 'euclidean', 'cosine', 'manhattan'
+def cluster_bookmarks(bookmark_data):
+    # Parse the JSON input if it's a string
+    if isinstance(bookmark_data, str):
+        bookmark_data = json.loads(bookmark_data)
 
-def cluster_bookmarks(bookmark_data_json):
-    bookmarks = json.loads(bookmark_data_json)
-    bookmarks_data = [{"name": bookmark.get("title", ""), "url": bookmark.get("url", ""), "tags": " ".join(bookmark.get("tags", []))} for bookmark in bookmarks]
+    print("Received bookmark data:", bookmark_data)
     
-    # Check if there are any valid tags
-    if not any(bookmark["tags"].strip() for bookmark in bookmarks_data):
-        # Return a default structure if there are no valid tags
-        return json.dumps({
-            "name": "Root",
-            "type": "folder",
-            "children": [{"name": "Uncategorized", "type": "folder", "children": [{"name": bookmark["name"], "type": "bookmark", "url": bookmark["url"]} for bookmark in bookmarks_data]}]
-        }, indent=2)
+    # Extract embeddings from the bookmark data
+    embeddings = np.array([bookmark["embedding"] for bookmark in bookmark_data])
+    print("Extracted embeddings:", embeddings)
     
-    vectorizer = TfidfVectorizer()
-    features = vectorizer.fit_transform([bookmark["tags"] for bookmark in bookmarks_data])
+    # Validate that there is at least one non-empty embedding array
+    if embeddings.size == 0:
+        raise ValueError("Embeddings are empty. Cannot perform clustering.")
+    
+    # Reduce the dimensionality of the embeddings using PCA
     pca = PCA(n_components=2)
-    reduced_features = pca.fit_transform(features.toarray())
+    reduced_embeddings = pca.fit_transform(embeddings)
     
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples,
-                                cluster_selection_epsilon=cluster_selection_epsilon, metric=metric,
+    # Create an instance of the HDBSCAN clusterer with the specified hyperparameters
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=2, min_samples=1,
+                                cluster_selection_epsilon=0.5, metric='euclidean',
                                 gen_min_span_tree=True)
-    clusterer.fit(reduced_features)
     
+    # Fit the clusterer to the reduced embeddings
+    clusterer.fit(reduced_embeddings)
+    
+    # Build the cluster hierarchy from the condensed tree
     cluster_hierarchy = {}
     for _, row in clusterer.condensed_tree_.to_pandas().iterrows():
         child = row['child']
@@ -42,23 +41,26 @@ def cluster_bookmarks(bookmark_data_json):
             cluster_hierarchy[child] = {'children': []}
         cluster_hierarchy[parent]['children'].append(child)
     
+    # Find the root cluster
     root_cluster = None
     for cluster_id in cluster_hierarchy:
         if cluster_id not in [child for parent in cluster_hierarchy for child in cluster_hierarchy[parent]['children']]:
             root_cluster = cluster_id
             break
     
+    # Assign bookmarks to their respective clusters
     cluster_bookmarks = {}
     for i, cluster_id in enumerate(clusterer.labels_):
         if cluster_id not in cluster_bookmarks:
             cluster_bookmarks[cluster_id] = []
-        cluster_bookmarks[cluster_id].append(bookmarks_data[i])
+        cluster_bookmarks[cluster_id].append(bookmark_data[i])
     
+    # Recursive function to generate the folder structure
     def generate_folder_structure(cluster_id, depth=0):
         folder = {}
         folder["name"] = f"Folder {cluster_id}"
         folder["type"] = "folder"
-        folder["children"] = [{"name": bookmark["name"], "type": "bookmark", "url": bookmark["url"]} for bookmark in cluster_bookmarks.get(cluster_id, [])]
+        folder["children"] = [{"name": bookmark["title"], "type": "bookmark", "url": bookmark["url"]} for bookmark in cluster_bookmarks.get(cluster_id, [])]
         for child_id in cluster_hierarchy.get(cluster_id, {}).get('children', []):
             child_folder = generate_folder_structure(child_id, depth + 1)
             if child_folder:
@@ -68,10 +70,12 @@ def cluster_bookmarks(bookmark_data_json):
         else:
             return None
     
+    # Generate the root folder structure
     root_folder = {
         "name": "Root",
         "type": "folder",
         "children": [generate_folder_structure(root_cluster)]
     }
     
+    # Return the folder structure as a JSON string
     return json.dumps(root_folder, indent=2)
