@@ -52,7 +52,9 @@ async function generateEmbeddings(bookmarkData) {
     throw new Error('Invalid input: Each bookmark must have a title (string) and tags (array).');
   }
 
-  const textList = bookmarkData.map(bookmark => `${bookmark.title} ${bookmark.tags.join(' ')}`);
+  //const textList = bookmarkData.map(bookmark => `${bookmark.title} ${bookmark.tags.join(' ')}`);
+  // instead of the above, lets include url as well
+  const textList = bookmarkData.map(bookmark => `${bookmark.title} ${bookmark.tags.join(' ')} ${bookmark.url}`);
 
 
   const apiUrl = "https://api.jina.ai/v1/embeddings";
