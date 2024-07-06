@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.decomposition import PCA
 import hdbscan
 import json
+from sklearn.metrics import silhouette_score
 
 def cluster_bookmarks(bookmark_data):
     # Parse the JSON input if it's a string
@@ -29,6 +30,13 @@ def cluster_bookmarks(bookmark_data):
     
     # Fit the clusterer to the reduced embeddings
     clusterer.fit(reduced_embeddings)
+
+    # Calculate silhouette score
+    # Note: Silhouette score is not defined for datasets with less than 2 clusters
+    if len(set(clusterer.labels_)) > 1:
+        silhouette_avg = silhouette_score(reduced_embeddings, clusterer.labels_)
+    else:
+        silhouette_avg = None
     
     # Build the cluster hierarchy from the condensed tree
     cluster_hierarchy = {}
@@ -78,4 +86,7 @@ def cluster_bookmarks(bookmark_data):
     }
     
     # Return the folder structure as a JSON string
-    return json.dumps(root_folder, indent=2)
+    return json.dumps({
+        "folder_structure": root_folder,
+        "silhouette_score": silhouette_avg
+    }, indent=2)
